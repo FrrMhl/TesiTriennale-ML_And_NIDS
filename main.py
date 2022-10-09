@@ -1,24 +1,37 @@
-from readAndWrite import letturaCompleteDataFrame, letturaSingleDataFrame
-from preprocessing import preprocessing
-from splitAndTraining import splitForTraining, train
+from readAndWrite import letturaBenevoliMalevoliCICIDS, letturaCompleteDataFrameCTU13, letturaSingleDataFrameCTU13, letturaCompleteDataFrameCICIDS
+from preprocessing import preprocessingCTU13, preprocessingCICIDS
+from splitAndTraining import splitForTrainingCTU13, trainCTU13
 import os
-from evaluation import reduceRecall
+from evaluation import reduceRecallCTU13
 
 
 if __name__ == '__main__':
     
-    if not os.path.exists('goodNetFlow.csv'):
+#    # codice per CTU-13 
+#    if not os.path.exists('CTU13-Preprocessed/goodNetFlow.csv'):
+#
+#        netflowDirectory = os.path.join(os.getcwd(), 'NetFlowCTU13')
+#        completeDataFrame = letturaCompleteDataFrameCTU13(netflowDirectory)
+#        goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame = preprocessingCTU13(completeDataFrame)
+#
+#    else:
+#        goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame = letturaSingleDataFrameCTU13()
+#
+#    dataset = splitForTrainingCTU13(goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame)
+#    modelloRbotAddestrato = trainCTU13(dataset)
+#
+#    reduceRecallCTU13(rbotDataFrame, modelloRbotAddestrato)
 
-        netflowDirectory = os.path.join(os.getcwd(), 'NetFlowCTU13')
-        completeDataFrame = letturaCompleteDataFrame(netflowDirectory)
-        goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame = preprocessing(completeDataFrame)
+
+    # codice per CICIDS2017 e CICIDS2018  
+    if not os.path.exists('CICIDS1718-Preprocessed/CICIDS17-benevoli.csv'):
+
+        directory17 = os.path.join(os.getcwd(), 'NetFlowCICIDS2017')
+        directory18 = os.path.join(os.getcwd(), 'NetFlowCICIDS2018')
+        cicids2017, cicids2018 = letturaCompleteDataFrameCICIDS(directory17, directory18)
+        c17b, c17m, c18b, c18m = preprocessingCICIDS(cicids2017, cicids2018)
 
     else:
-        goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame = letturaSingleDataFrame()
-
-    dataset = splitForTraining(goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame)
-    modelloRbotAddestrato = train(dataset)
-
-    reduceRecall(rbotDataFrame, modelloRbotAddestrato)
-                
-    #  trovare attacchi comuni con altri dataset
+        c17b, c17m, c18b, c18m = letturaBenevoliMalevoliCICIDS()
+    
+    

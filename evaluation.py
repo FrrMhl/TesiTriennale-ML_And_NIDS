@@ -8,7 +8,7 @@ from sklearn.metrics import recall_score
     funzione per la modifica di alcune feature per evadere la NIDS
     parametri -> dataset contenente il traffico malevolo e il modello addestrato in precedenza
 """
-def reduceRecall(dataSetMalevolo, modelloAddestrato):
+def reduceRecallCTU13(dataSetMalevolo, modelloAddestrato):
 
     featureToChange = {
         'Duration': 0,

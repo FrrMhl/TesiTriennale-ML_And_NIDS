@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
     funzione per la suddivisione in tarining e testing set
     parametri -> vari dataset da suddividere
 """
-def splitForTraining(goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame):
+def splitForTrainingCTU13(goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame):
 
     # creazione train e test set (proporzione 1:20)
     dataset = []
@@ -36,7 +36,7 @@ def splitForTraining(goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFram
     funzione per l'addestramento e la valutazione delle performance
     parametri -> lista con i vari dataset
 """
-def train(dataset):
+def trainCTU13(dataset):
 
     nomi = ['Neris', 'Rbot', 'Virut', 'Menti', 'Murlo']
     for (nome, df) in zip(nomi, dataset):

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from ipaddress import ip_address
-from readAndWrite import splitFromCompleteToSingle, scritturaSuFile
+from readAndWrite import splitFromCompleteToSingleCTU13, scritturaSuFileCTU13, splitIntoBenevoloMalevolo, scritturaSuFileCICIDS
 
 pd.options.mode.chained_assignment = None
 
@@ -13,7 +13,7 @@ pd.options.mode.chained_assignment = None
     funzione per la modifica delle varie features del dataset completo
     parametri -> datasetcompleto
 """
-def preprocessing(completeDataFrame):
+def preprocessingCTU13(completeDataFrame):
 
     # rimozione valori nulli, traffico non tcp
     completeDataFrame.replace('', np.nan, inplace=True)
@@ -120,7 +120,50 @@ def preprocessing(completeDataFrame):
     
     completeDataFrame.drop(columns='State', inplace=True)
 
-    goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame = splitFromCompleteToSingle(completeDataFrame)
-    scritturaSuFile(goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame)
+    goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame = splitFromCompleteToSingleCTU13(completeDataFrame)
+    scritturaSuFileCTU13(goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame)
     
     return goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame
+
+
+
+
+
+"""
+    funziona che lascia solo attacchi dos-hulk e benevoli dai dataset cicids
+    parametri -> dataset di cicids17 e cicids18
+"""
+def preprocessingCICIDS(cicids17, cicids18):
+
+    cicids17 = cicids17[(cicids17[' Label'] == 'BENIGN') | (cicids17[' Label'] == 'DoS Hulk')]
+    cicids18 = cicids18[(cicids18['Label'] == 'Benign') | (cicids18['Label'] == 'DoS attacks-Hulk')]
+
+    # rimozione valori nulli
+    cicids17.replace('', np.nan, inplace=True)
+    cicids17.dropna(inplace=True)
+
+    cicids18.replace('', np.nan, inplace=True)
+    cicids18.dropna(inplace=True)
+
+    # rimozione feature che non combaciano tra i due dataset
+    cicids17.drop(columns=' Fwd Header Length', inplace=True)
+    cicids18.drop(columns='Protocol', inplace=True)
+    cicids18.drop(columns='Timestamp', inplace=True)
+
+    # sostituzione features di cicids17 con quelle di cicids18
+    newValue = cicids18.columns.tolist()
+    oldValue = cicids17.columns.tolist()
+    dizionario = dict(zip(oldValue, newValue))
+    cicids17.rename(columns=dizionario, inplace=True)
+
+    # cicids18 ha tutto a categorico, quindi lo faccio numerico e copio per cicids17
+    cicids18 = cicids18.apply(pd.to_numeric, errors='ignore')
+    type18 = cicids18.dtypes.tolist()
+    column17 = cicids17.columns.tolist()
+    dizionario = dict(zip(column17, type18))
+    cicids17 = cicids17.astype(dizionario)
+
+    c17b, c17m, c18b, c18m = splitIntoBenevoloMalevolo(cicids17, cicids18)
+    scritturaSuFileCICIDS(c17b, c17m, c18b, c18m)
+
+    return c17b, c17m, c18b, c18m
