@@ -75,22 +75,22 @@ def splitForTrainingCICIDS(c17b, c17m, c18b, c18m):
     nomi = []
 
     # benevoli 17 malevoli 17
-    nomi.append(['Benenevoli CICIDS_2017', 'Malevoli CICIDS_2017'])
+    nomi.append(['Benevoli CICIDS_2017', 'Malevoli CICIDS_2017'])
     df = pd.concat([c17b, c17m], ignore_index=True)
     combinazioni.append(df)
 
     # benevoli 17 malevoli 18
-    nomi.append(['Benenevoli CICIDS_2017', 'Malevoli CICIDS_2018'])
+    nomi.append(['Benevoli CICIDS_2017', 'Malevoli CICIDS_2018'])
     df = pd.concat([c17b, c18m], ignore_index=True)
     combinazioni.append(df)
 
     # benevoli 18 malevoli 17
-    nomi.append(['Benenevoli CICIDS_2018', 'Malevoli CICIDS_2017'])
+    nomi.append(['Benevoli CICIDS_2018', 'Malevoli CICIDS_2017'])
     df = pd.concat([c18b, c17m], ignore_index=True)
     combinazioni.append(df)
 
     # benevoli 18 malevoli 18
-    nomi.append(['Benenevoli CICIDS_2018', 'Malevoli CICIDS_2018'])
+    nomi.append(['Benevoli CICIDS_2018', 'Malevoli CICIDS_2018'])
     df = pd.concat([c18b, c18m], ignore_index=True)
     combinazioni.append(df)
 
@@ -106,6 +106,9 @@ def splitForTrainingCICIDS(c17b, c17m, c18b, c18m):
 """
 def trainCICIDS(combinazioni, nomi):
 
+    # per prendeere i modelli addestrati 0 e 3 che sono i modelli completi cicids17 e cicids18
+    i = 0
+    modelliAddestrati = []
     for (combinazione, nome) in zip(combinazioni, nomi):
 
         # addestramento e valutazione
@@ -116,6 +119,9 @@ def trainCICIDS(combinazioni, nomi):
 
         clf = RandomForestClassifier()
         clf.fit(X_train, y_train)
+        # prendo il modello di cicids17 e cicids18 e li provo con i malevoli invertiti
+        if i == 0 or i == 3:
+            modelliAddestrati.append(clf)
         val = clf.predict(X_test)
 
         print('\n\n\n\n\n-----------------------------------------------------------------')
@@ -123,3 +129,7 @@ def trainCICIDS(combinazioni, nomi):
         print('Recall is {}'.format(recall_score(y_test, val)))
         print('Precision is {}'.format(precision_score(y_test, val)))
         print('F1-Score is {}'.format(f1_score(y_test, val)))
+
+        i += 1
+
+    return modelliAddestrati

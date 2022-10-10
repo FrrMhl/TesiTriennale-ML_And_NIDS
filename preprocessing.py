@@ -178,6 +178,18 @@ def preprocessingCICIDS(cicids17, cicids18):
             max = cicids18[column].max()
             cicids18.replace(np.nan, max, inplace=True)
 
+    # eliminazione colonne derivate che non ci sono in CTU13, aggiunta di colonne presenti in CTU13, durata ma micro a secondi
+    cicids17['Flow Duration'] /= 1000000
+    cicids18['Flow Duration'] /= 1000000
+
+    cicids17['Tot Pkts'] = cicids17.apply(lambda row: row['Tot Fwd Pkts'] + row['Tot Bwd Pkts'], axis=1)
+    cicids18['Tot Pkts'] = cicids18.apply(lambda row: row['Tot Fwd Pkts'] + row['Tot Bwd Pkts'], axis=1)
+
+    columnToDrop = ['Flow Byts/s', 'Fwd Pkts/s', 'Bwd Pkts/s', 'Tot Fwd Pkts', 'Tot Bwd Pkts']
+
+    cicids17.drop(columns=columnToDrop, inplace=True)
+    cicids18.drop(columns=columnToDrop, inplace=True)
+
     c17b, c17m, c18b, c18m = splitIntoBenevoloMalevolo(cicids17, cicids18)
     scritturaSuFileCICIDS(c17b, c17m, c18b, c18m)
 

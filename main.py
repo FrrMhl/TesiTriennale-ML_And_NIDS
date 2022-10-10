@@ -2,25 +2,25 @@ from readAndWrite import letturaBenevoliMalevoliCICIDS, letturaCompleteDataFrame
 from preprocessing import preprocessingCTU13, preprocessingCICIDS
 from splitAndTraining import splitForTrainingCICIDS, splitForTrainingCTU13, trainCTU13, trainCICIDS
 import os
-from evaluation import reduceRecallCTU13
+from evaluation import reduceRecallCICIDS, reduceRecallCTU13, scambioMalevoliCICIDS
 import numpy as np
 
 if __name__ == '__main__':
     
-    # codice per CTU-13 
-    if not os.path.exists('CTU13-Preprocessed/goodNetFlow.csv'):
-
-        netflowDirectory = os.path.join(os.getcwd(), 'NetFlowCTU13')
-        completeDataFrame = letturaCompleteDataFrameCTU13(netflowDirectory)
-        goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame = preprocessingCTU13(completeDataFrame)
-
-    else:
-        goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame = letturaSingleDataFrameCTU13()
-
-    dataset = splitForTrainingCTU13(goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame)
-    modelloRbotAddestrato = trainCTU13(dataset)
-
-    reduceRecallCTU13(rbotDataFrame, modelloRbotAddestrato)
+#    # codice per CTU-13 
+#    if not os.path.exists('CTU13-Preprocessed/goodNetFlow.csv'):
+#
+#        netflowDirectory = os.path.join(os.getcwd(), 'NetFlowCTU13')
+#        completeDataFrame = letturaCompleteDataFrameCTU13(netflowDirectory)
+#        goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame = preprocessingCTU13(completeDataFrame)
+#
+#    else:
+#        goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame = letturaSingleDataFrameCTU13()
+#
+#    dataset = splitForTrainingCTU13(goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame)
+#    modelloRbotAddestrato = trainCTU13(dataset)
+#
+#    reduceRecallCTU13(rbotDataFrame, modelloRbotAddestrato)
 
 
     # codice per CICIDS2017 e CICIDS2018  
@@ -33,7 +33,9 @@ if __name__ == '__main__':
 
     else:
         c17b, c17m, c18b, c18m = letturaBenevoliMalevoliCICIDS()
-
+        
     combinazioni, nomi = splitForTrainingCICIDS(c17b, c17m, c18b, c18m)
-    trainCICIDS(combinazioni, nomi)
+    modello17, modello18 = trainCICIDS(combinazioni, nomi)
     
+    scambioMalevoliCICIDS(modello17, c18m, modello18, c17m)
+    reduceRecallCICIDS(modello17, c17m, modello18, c18m)
