@@ -163,6 +163,21 @@ def preprocessingCICIDS(cicids17, cicids18):
     dizionario = dict(zip(column17, type18))
     cicids17 = cicids17.astype(dizionario)
 
+    # sostituisco infiniti con valori max per ogni colonna
+    for column in cicids17.drop(columns='Label'):
+        count = np.isinf(cicids17[column]).values.sum()
+        if count > 0:
+            cicids17.replace(np.inf, np.nan, inplace=True)
+            max = cicids17[column].max()
+            cicids17.replace(np.nan, max, inplace=True)
+    
+    for column in cicids18.drop(columns='Label'):
+        count = np.isinf(cicids18[column]).values.sum()
+        if count > 0:
+            cicids18.replace(np.inf, np.nan, inplace=True)
+            max = cicids18[column].max()
+            cicids18.replace(np.nan, max, inplace=True)
+
     c17b, c17m, c18b, c18m = splitIntoBenevoloMalevolo(cicids17, cicids18)
     scritturaSuFileCICIDS(c17b, c17m, c18b, c18m)
 

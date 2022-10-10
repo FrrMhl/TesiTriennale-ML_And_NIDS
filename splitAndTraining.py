@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 
 
 """
-    funzione per la suddivisione in tarining e testing set
+    funzione per la suddivisione in training e testing set
     parametri -> vari dataset da suddividere
 """
 def splitForTrainingCTU13(goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame):
@@ -60,4 +60,66 @@ def trainCTU13(dataset):
         print('F1-Score is {}'.format(f1_score(y_test, val)))
 
     return modelloRbotAddestrato       
-    
+
+
+
+
+
+"""
+    funzione per la creazione delle varie combinazioni tra i vari dataset
+    parametri -> vari dataset da combinare tra loro
+"""
+def splitForTrainingCICIDS(c17b, c17m, c18b, c18m):
+
+    combinazioni = []
+    nomi = []
+
+    # benevoli 17 malevoli 17
+    nomi.append(['Benenevoli CICIDS_2017', 'Malevoli CICIDS_2017'])
+    df = pd.concat([c17b, c17m], ignore_index=True)
+    combinazioni.append(df)
+
+    # benevoli 17 malevoli 18
+    nomi.append(['Benenevoli CICIDS_2017', 'Malevoli CICIDS_2018'])
+    df = pd.concat([c17b, c18m], ignore_index=True)
+    combinazioni.append(df)
+
+    # benevoli 18 malevoli 17
+    nomi.append(['Benenevoli CICIDS_2018', 'Malevoli CICIDS_2017'])
+    df = pd.concat([c18b, c17m], ignore_index=True)
+    combinazioni.append(df)
+
+    # benevoli 18 malevoli 18
+    nomi.append(['Benenevoli CICIDS_2018', 'Malevoli CICIDS_2018'])
+    df = pd.concat([c18b, c18m], ignore_index=True)
+    combinazioni.append(df)
+
+    return combinazioni, nomi
+
+
+
+
+
+"""
+    funzione per l'addestramento e la valutazione delle performance delle combinazioni di CICIDS
+    parametri -> lista con le varie combianazioni e nomi
+"""
+def trainCICIDS(combinazioni, nomi):
+
+    for (combinazione, nome) in zip(combinazioni, nomi):
+
+        # addestramento e valutazione
+        X = combinazione.drop('Label', axis=1)
+        y = combinazione['Label']
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2) 
+
+        clf = RandomForestClassifier()
+        clf.fit(X_train, y_train)
+        val = clf.predict(X_test)
+
+        print('\n\n\n\n\n-----------------------------------------------------------------')
+        print('Modello con -> {} e {}'.format(nome[0], nome[1]))
+        print('Recall is {}'.format(recall_score(y_test, val)))
+        print('Precision is {}'.format(precision_score(y_test, val)))
+        print('F1-Score is {}'.format(f1_score(y_test, val)))
