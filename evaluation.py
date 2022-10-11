@@ -1,5 +1,8 @@
 from sklearn.metrics import recall_score
 import numpy as np
+import pandas as pd
+
+pd.options.mode.use_inf_as_na = True
 
 
 
@@ -91,12 +94,12 @@ def scambioMalevoliCICIDS(modello17, c18m, modello18, c17m):
 
     val = modello17.predict(c18m.drop(columns='Label'))
     print('\n\n\n\n\n-----------------------------------------------------------------')
-    print('Modello completo CICIDS2017 con malevoli di CICIDS2018')
+    print('Modello completo CICIDS_2017 con malevoli di CICIDS_2018')
     print('Recall is -> {}'.format(recall_score(c18m['Label'], val)))
 
     val = modello18.predict(c17m.drop(columns='Label'))
     print('\n\n\n\n\n-----------------------------------------------------------------')
-    print('Modello completo CICIDS2018 con malevoli di CICIDS2017')
+    print('Modello completo CICIDS_2018 con malevoli di CICIDS_2017')
     print('Recall is -> {}'.format(recall_score(c17m['Label'], val)))
 
 
@@ -148,9 +151,11 @@ def reduceRecallCICIDS(modello17, c17m, modello18, c18m):
 
     modelli = [modello17, modello18]
     malevoli = [c17m, c18m]
+    attacchiCICIDS2017 = []
+    attacchiCICIDS2018 = []
 
     print('\n\n\n\n\n-----------------------------------------------------------------')
-    print('Modello CICIDS_2017 con campi modificati\n')
+    print('Modello CICIDS_2017 con campi modificati')
     for (modello, malevolo) in zip(modelli, malevoli):
         indice = 1
 
@@ -163,21 +168,59 @@ def reduceRecallCICIDS(modello17, c17m, modello18, c18m):
                     indexOfIncrement = featureToChange.get(feature)
                     df[feature] += incrementi[indexOfIncrement]
 
-                # modifico le feature derivate (sostituisco gli 0 con il valore minimo della colonna per non avere NaN)
-                df['TotLen Bwd Pkts'].replace(0, np.nan, inplace=True)
-                df['TotLen Bwd Pkts'].replace(np.nan, df['TotLen Bwd Pkts'].min(), inplace=True)
+                # modifico le feature derivate (se ci sono NaN li sostiruisco con il valore max della colonna)
+                df['TotLen Pkts'] = df['TotLen Fwd Pkts'] + df['TotLen Bwd Pkts']
 
-                df['Flow Duration'].replace(0, np.nan, inplace=True)
-                df['Flow Duration'].replace(np.nan, df['Flow Duration'].min(), inplace=True)
+                df['TotLen Per Pkts'] = df['Tot Pkts'] / df['TotLen Pkts']
+                df['TotLen Per Pkts'].replace(np.nan, df['TotLen Per Pkts'].max(), inplace=True)
 
-                df['Down/Up Ratio'] = df['TotLen Fwd Pkts'] / df['TotLen Bwd Pkts']
+                df['Down/Up Ratio'] =  df['TotLen Bwd Pkts'] / df['TotLen Fwd Pkts']
+                df['Down/Up Ratio'].replace(np.nan, df['Down/Up Ratio'].max(), inplace=True)
+
                 df['Flow Pkts/s'] = df['Tot Pkts'] / df['Flow Duration']
+                df['Flow Pkts/s'].replace(np.nan, df['Flow Pkts/s'].max(), inplace=True)
+
+                # salvo gli attacchi da valutare in seguito sugli ensamble
+                if modelli.index(modello) == 0:
+                    attacchiCICIDS2017.append(df)
+                else:
+                    attacchiCICIDS2018.append(df)
 
                 # valuto questo nuovo modello
                 val = modello.predict(df.drop(columns='Label'))
                 print('{} -> Recall for group {} and increment {} is {}'.format(indice, gruppo, key, recall_score(df['Label'], val)))
                 indice += 1
             print('\n')
-    
-        print('\n\n\n\n\n-----------------------------------------------------------------')
-        print('Modello CICIDS_2018 con campi modificati\n')
+
+        if modelli.index(modello) == 0:
+            print('\n\n\n\n\n-----------------------------------------------------------------')
+            print('Modello CICIDS_2018 con campi modificati')
+
+    return attacchiCICIDS2017, attacchiCICIDS2018
+
+
+
+
+
+"""
+    funzione per lprovare gli ensamble creati sugli attacchi dovuti alla modifica delle features
+    parametri -> ensamble e attacchi
+"""
+def ensambleCICIDS(bestModel, attacchi17, attacchi18):
+
+    print('\n\n\n\n\n-----------------------------------------------------------------')
+    print('Modello addestrato su benevoli e malevoli di CICIDS_2017 + malevoli CICIDS_2018 valutato su attacchi di CICIDS_2017')
+    indice = 1
+    for attacco in attacchi17:
+        val = bestModel[0].predict(attacco.drop(columns='Label'))
+        print('{} -> Recall is {}'.format(indice, recall_score(attacco['Label'], val)))
+        indice += 1
+
+
+    print('\n\n\n\n\n-----------------------------------------------------------------')
+    print('Modello addestrato su benevoli e malevoli di CICIDS_2018 + malevoli CICIDS_2017 valutato su attacchi di CICIDS_2018')
+    indice = 1
+    for attacco in attacchi18:
+        val = bestModel[1].predict(attacco.drop(columns='Label'))
+        print('{} -> Recall is {}'.format(indice, recall_score(attacco['Label'], val)))
+        indice += 1

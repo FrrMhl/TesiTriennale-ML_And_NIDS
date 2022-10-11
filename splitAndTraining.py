@@ -73,6 +73,7 @@ def splitForTrainingCICIDS(c17b, c17m, c18b, c18m):
 
     combinazioni = []
     nomi = []
+    ensamble = []
 
     # benevoli 17 malevoli 17
     nomi.append(['Benevoli CICIDS_2017', 'Malevoli CICIDS_2017'])
@@ -94,7 +95,15 @@ def splitForTrainingCICIDS(c17b, c17m, c18b, c18m):
     df = pd.concat([c18b, c18m], ignore_index=True)
     combinazioni.append(df)
 
-    return combinazioni, nomi
+    # benevoli 17 malevoli 17 + malevoli 18
+    df = pd.concat([c17b, c17m, c18m], ignore_index=True)
+    ensamble.append(df)
+
+    # benevoli 18 malevoli 18 + malevoli 17
+    df = pd.concat([c18b, c18m, c17m], ignore_index=True)
+    ensamble.append(df)
+
+    return combinazioni, nomi, ensamble
 
 
 
@@ -104,7 +113,7 @@ def splitForTrainingCICIDS(c17b, c17m, c18b, c18m):
     funzione per l'addestramento e la valutazione delle performance delle combinazioni di CICIDS
     parametri -> lista con le varie combianazioni e nomi
 """
-def trainCICIDS(combinazioni, nomi):
+def trainCICIDS(combinazioni, nomi, ensamble):
 
     # per prendeere i modelli addestrati 0 e 3 che sono i modelli completi cicids17 e cicids18
     i = 0
@@ -132,4 +141,15 @@ def trainCICIDS(combinazioni, nomi):
 
         i += 1
 
-    return modelliAddestrati
+    # addestro gli ensamble da usare con gli attacchi creati
+    bestModel = []
+    for modello in ensamble:
+
+        X = modello.drop('Label', axis=1)
+        y = modello['Label']
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2) 
+        clf = RandomForestClassifier()
+        clf.fit(X_train, y_train)
+        bestModel.append(clf)
+
+    return modelliAddestrati[0], modelliAddestrati[1], bestModel

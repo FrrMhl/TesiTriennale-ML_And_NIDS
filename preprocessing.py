@@ -9,10 +9,10 @@ pd.options.mode.chained_assignment = None
 
 
 
-"""
+'''
     funzione per la modifica delle varie features del dataset completo
     parametri -> datasetcompleto
-"""
+'''
 def preprocessingCTU13(completeDataFrame):
 
     # rimozione valori nulli, traffico non tcp
@@ -84,7 +84,7 @@ def preprocessingCTU13(completeDataFrame):
     #     1     1     0     0     1     1     0     0
 
     listaStati = completeDataFrame['State'].to_list()
-    listaDiListe = [i.split("_") for i in listaStati]
+    listaDiListe = [i.split('_') for i in listaStati]
     valoriSrc = []
     valoriDst = []
 
@@ -129,10 +129,10 @@ def preprocessingCTU13(completeDataFrame):
 
 
 
-"""
+'''
     funziona che lascia solo attacchi dos-hulk e benevoli dai dataset cicids
     parametri -> dataset di cicids17 e cicids18
-"""
+'''
 def preprocessingCICIDS(cicids17, cicids18):
 
     cicids17 = cicids17[(cicids17[' Label'] == 'BENIGN') | (cicids17[' Label'] == 'DoS Hulk')]
@@ -185,7 +185,99 @@ def preprocessingCICIDS(cicids17, cicids18):
     cicids17['Tot Pkts'] = cicids17.apply(lambda row: row['Tot Fwd Pkts'] + row['Tot Bwd Pkts'], axis=1)
     cicids18['Tot Pkts'] = cicids18.apply(lambda row: row['Tot Fwd Pkts'] + row['Tot Bwd Pkts'], axis=1)
 
-    columnToDrop = ['Flow Byts/s', 'Fwd Pkts/s', 'Bwd Pkts/s', 'Tot Fwd Pkts', 'Tot Bwd Pkts']
+    cicids17['TotLen Pkts'] = cicids17.apply(lambda row: row['TotLen Fwd Pkts'] + row['TotLen Bwd Pkts'], axis=1)
+    cicids18['TotLen Pkts'] = cicids18.apply(lambda row: row['TotLen Fwd Pkts'] + row['TotLen Bwd Pkts'], axis=1)
+
+    cicids17['TotLen Per Pkts'] = cicids17.apply(lambda row: row['Tot Pkts'] / row['TotLen Pkts'] if row['TotLen Pkts'] != 0 and row['Tot Pkts'] != 0 else np.nan, axis=1)
+    cicids17['TotLen Per Pkts'].replace(np.nan, cicids17['TotLen Per Pkts'].max(), inplace=True)
+    cicids18['TotLen Per Pkts'] = cicids18.apply(lambda row: row['Tot Pkts'] / row['TotLen Pkts'] if row['TotLen Pkts'] != 0 and row['Tot Pkts'] != 0 else np.nan, axis=1)
+    cicids18['TotLen Per Pkts'].replace(np.nan, cicids18['TotLen Per Pkts'].max(), inplace=True)
+
+    portNewDest = ['Dst Port WellKnown', 'Dst Port Registered', 'Dst Port Private']
+    fn = [
+        lambda row: 1 if 0 <= int(row['Dst Port']) <= 1023 else 0,
+        lambda row: 1 if 1024 <= int(row['Dst Port']) <= 49151 else 0,
+        lambda row: 1 if int(row['Dst Port']) >= 49152 else 0
+    ]
+    for (y, z) in zip(portNewDest, fn):
+            cicids17[y] = cicids17.apply(z, axis=1)
+            cicids18[y] = cicids18.apply(z, axis=1)
+        
+    
+    columnToDrop = [
+        'Dst Port',
+        'Flow Byts/s', 
+        'Fwd Pkts/s', 
+        'Bwd Pkts/s', 
+        'Tot Fwd Pkts', 
+        'Tot Bwd Pkts',
+        'Fwd Pkt Len Max', 
+        'Fwd Pkt Len Min', 
+        'Fwd Pkt Len Mean', 
+        'Fwd Pkt Len Std', 
+        'Bwd Pkt Len Max', 
+        'Bwd Pkt Len Min', 
+        'Bwd Pkt Len Mean', 
+        'Bwd Pkt Len Std',
+        'Flow IAT Mean', 
+        'Flow IAT Std', 
+        'Flow IAT Max', 
+        'Flow IAT Min', 
+        'Fwd IAT Tot', 
+        'Fwd IAT Mean', 
+        'Fwd IAT Std', 
+        'Fwd IAT Max', 
+        'Fwd IAT Min', 
+        'Bwd IAT Tot', 
+        'Bwd IAT Mean', 
+        'Bwd IAT Std', 
+        'Bwd IAT Max', 
+        'Bwd IAT Min', 
+        'Fwd PSH Flags', 
+        'Bwd PSH Flags', 
+        'Fwd URG Flags', 
+        'Bwd URG Flags', 
+        'Fwd Header Len', 
+        'Bwd Header Len', 
+        'Pkt Len Min', 
+        'Pkt Len Max', 
+        'Pkt Len Mean', 
+        'Pkt Len Std', 
+        'Pkt Len Var', 
+        'FIN Flag Cnt', 
+        'SYN Flag Cnt',
+        'RST Flag Cnt', 
+        'PSH Flag Cnt', 
+        'ACK Flag Cnt', 
+        'URG Flag Cnt', 
+        'CWE Flag Count', 
+        'ECE Flag Cnt',
+        'Pkt Size Avg', 
+        'Fwd Seg Size Avg', 
+        'Bwd Seg Size Avg', 
+        'Fwd Byts/b Avg', 
+        'Fwd Pkts/b Avg', 
+        'Fwd Blk Rate Avg', 
+        'Bwd Byts/b Avg', 
+        'Bwd Pkts/b Avg', 
+        'Bwd Blk Rate Avg', 
+        'Subflow Fwd Pkts', 
+        'Subflow Fwd Byts', 
+        'Subflow Bwd Pkts', 
+        'Subflow Bwd Byts', 
+        'Init Fwd Win Byts', 
+        'Init Bwd Win Byts', 
+        'Fwd Act Data Pkts', 
+        'Fwd Seg Size Min', 
+        'Active Mean', 
+        'Active Std', 
+        'Active Max', 
+        'Active Min', 
+        'Idle Mean', 
+        'Idle Std', 
+        'Idle Max', 
+        'Idle Min',
+    ]
 
     cicids17.drop(columns=columnToDrop, inplace=True)
     cicids18.drop(columns=columnToDrop, inplace=True)
