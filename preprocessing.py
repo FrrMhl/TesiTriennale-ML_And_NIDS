@@ -188,9 +188,9 @@ def preprocessingCICIDS(cicids17, cicids18):
     cicids17['TotLen Pkts'] = cicids17.apply(lambda row: row['TotLen Fwd Pkts'] + row['TotLen Bwd Pkts'], axis=1)
     cicids18['TotLen Pkts'] = cicids18.apply(lambda row: row['TotLen Fwd Pkts'] + row['TotLen Bwd Pkts'], axis=1)
 
-    cicids17['TotLen Per Pkts'] = cicids17.apply(lambda row: row['Tot Pkts'] / row['TotLen Pkts'] if row['TotLen Pkts'] != 0 and row['Tot Pkts'] != 0 else np.nan, axis=1)
+    cicids17['TotLen Per Pkts'] = cicids17.apply(lambda row: row['TotLen Pkts'] / row['Tot Pkts'] if row['Tot Pkts'] != 0 and row['TotLen Pkts'] != 0 else np.nan, axis=1)
     cicids17['TotLen Per Pkts'].replace(np.nan, cicids17['TotLen Per Pkts'].max(), inplace=True)
-    cicids18['TotLen Per Pkts'] = cicids18.apply(lambda row: row['Tot Pkts'] / row['TotLen Pkts'] if row['TotLen Pkts'] != 0 and row['Tot Pkts'] != 0 else np.nan, axis=1)
+    cicids18['TotLen Per Pkts'] = cicids18.apply(lambda row: row['TotLen Pkts'] / row['Tot Pkts'] if row['Tot Pkts'] != 0 and row['TotLen Pkts'] != 0 else np.nan, axis=1)
     cicids18['TotLen Per Pkts'].replace(np.nan, cicids18['TotLen Per Pkts'].max(), inplace=True)
 
     portNewDest = ['Dst Port WellKnown', 'Dst Port Registered', 'Dst Port Private']

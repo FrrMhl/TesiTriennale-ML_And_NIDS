@@ -7,20 +7,20 @@ import numpy as np
 
 if __name__ == '__main__':
     
-    # codice per CTU-13 
-    if not os.path.exists('CTU13-Preprocessed/goodNetFlow.csv'):
-
-        netflowDirectory = os.path.join(os.getcwd(), 'NetFlowCTU13')
-        completeDataFrame = letturaCompleteDataFrameCTU13(netflowDirectory)
-        goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame = preprocessingCTU13(completeDataFrame)
-
-    else:
-        goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame = letturaSingleDataFrameCTU13()
-
-    dataset = splitForTrainingCTU13(goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame)
-    modelloRbotAddestrato = trainCTU13(dataset)
-
-    reduceRecallCTU13(rbotDataFrame, modelloRbotAddestrato)
+#    # codice per CTU-13 
+#    if not os.path.exists('CTU13-Preprocessed/goodNetFlow.csv'):
+#
+#        netflowDirectory = os.path.join(os.getcwd(), 'NetFlowCTU13')
+#        completeDataFrame = letturaCompleteDataFrameCTU13(netflowDirectory)
+#        goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame = preprocessingCTU13(completeDataFrame)
+#
+#    else:
+#        goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame = letturaSingleDataFrameCTU13()
+#
+#    dataset = splitForTrainingCTU13(goodDataFrame, nerisDataFrame, rbotDataFrame, virutDataFrame, mentiDataFrame, murloDataFrame)
+#    modelloRbotAddestrato = trainCTU13(dataset)
+#
+#    reduceRecallCTU13(rbotDataFrame, modelloRbotAddestrato)
 
 
     # codice per CICIDS2017 e CICIDS2018  

@@ -74,7 +74,7 @@ def reduceRecallCTU13(dataSetMalevolo, modelloAddestrato):
             df['RatioOutIn'] = df['OutBytes'] / df['InBytes']
             df['TotBytes'] = df['OutBytes'] + df['InBytes']
             df['PktsPerSec'] = df['TotPkts'] / df['Duration']
-            df['BytesPerPkt'] = df['TotPkts'] / df['TotBytes']
+            df['BytesPerPkt'] = df['TotBytes'] / df['TotPkts']
 
             # valuto questo nuovo modello
             val = modelloAddestrato.predict(df.drop(columns='Label'))
@@ -150,7 +150,7 @@ def reduceRecallCICIDS(modello17, c17m, modello18, c18m):
     }
 
     modelli = [modello17, modello18]
-    malevoli = [c17m, c18m]
+    malevoli = [c18m, c17m]
     attacchiCICIDS2017 = []
     attacchiCICIDS2018 = []
 
@@ -171,7 +171,7 @@ def reduceRecallCICIDS(modello17, c17m, modello18, c18m):
                 # modifico le feature derivate (se ci sono NaN li sostiruisco con il valore max della colonna)
                 df['TotLen Pkts'] = df['TotLen Fwd Pkts'] + df['TotLen Bwd Pkts']
 
-                df['TotLen Per Pkts'] = df['Tot Pkts'] / df['TotLen Pkts']
+                df['TotLen Per Pkts'] = df['TotLen Pkts'] / df['Tot Pkts']
                 df['TotLen Per Pkts'].replace(np.nan, df['TotLen Per Pkts'].max(), inplace=True)
 
                 df['Down/Up Ratio'] =  df['TotLen Bwd Pkts'] / df['TotLen Fwd Pkts']
@@ -209,7 +209,7 @@ def reduceRecallCICIDS(modello17, c17m, modello18, c18m):
 def ensambleCICIDS(bestModel, attacchi17, attacchi18):
 
     print('\n\n\n\n\n-----------------------------------------------------------------')
-    print('Modello addestrato su benevoli e malevoli di CICIDS_2017 + malevoli CICIDS_2018 valutato su attacchi di CICIDS_2017')
+    print('Modello addestrato su benevoli e malevoli di CICIDS_2017 + malevoli CICIDS_2018 valutato su attacchi di CICIDS_2018')
     indice = 1
     for attacco in attacchi17:
         val = bestModel[0].predict(attacco.drop(columns='Label'))
@@ -218,7 +218,7 @@ def ensambleCICIDS(bestModel, attacchi17, attacchi18):
 
 
     print('\n\n\n\n\n-----------------------------------------------------------------')
-    print('Modello addestrato su benevoli e malevoli di CICIDS_2018 + malevoli CICIDS_2017 valutato su attacchi di CICIDS_2018')
+    print('Modello addestrato su benevoli e malevoli di CICIDS_2018 + malevoli CICIDS_2017 valutato su attacchi di CICIDS_2017')
     indice = 1
     for attacco in attacchi18:
         val = bestModel[1].predict(attacco.drop(columns='Label'))
